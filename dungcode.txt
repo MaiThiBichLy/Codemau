@@ -1,0 +1,119 @@
+B?N THU HO?CH TH?C T?P
+Cách S? d?ng CKE
+Khai báo d? s? d?ng, add thu vi?n, nhúng vào ? trang Default
+<%@ register Assembly="CKEditor.NET" Namespace="CKEditor.NET" TagPrefix="CKEditor" %>
+S? d?ng CKE
+<ckeditor:ckeditorcontrol ID="noiDungMau" runat="server" BasePath="~/ckeditor/" Width="99%"Height="300px">
+</ckeditor:ckeditorcontrol>
+Khi s? d?ng ph?i t?t ValidateRequest="false"   
+<%@ Page ValidateRequest="false"   Language="C#" MasterPageFile="~/Default.Master" AutoEventWireup="true" CodeBehind="dmbaocaomau.aspx.cs" Inherits="NTSoftReceipt.danhmuc.dmbaocaomau" %>
+L?y n?i dung CKE
+CKEDITOR.instances.ctl00_ContentPlaceHolder1_noiDungMau.getData()
+Set n?i dung CKE
+CKEDITOR.instances.ctl00_ContentPlaceHolder1_noiDungMau.setData(N?i dung c?n set)
+Vô hi?u hóa CKE
+CKEDITOR.instances.ctl00_ContentPlaceHolder1_editor1.setReadOnly(true);
+X? lý tru?ng h?p l?y n?i dung of CKE khi nó dx d?nh d?ng (n?u k x? lý nó s? l?y nhu hình)
+ 
+Nh?n s?a
+        function Grid1_OnBeforeClientEdit(record) {
+            HienThiControl("thongTinMau", false);
+            HienThiControl("chiTietMau", true);
+            document.getElementById("ctl00_ContentPlaceHolder1_hdfsttDMBaoCaoMaupr").value = record.sttDMBaoCaoMaupr;
+            _txtTenBaoCao.value(record.tenBaoCao);
+            CKEDITOR.instances.ctl00_ContentPlaceHolder1_noiDungMau.setData(NTSoftReceipt.danhmuc.dmbaocaomau.getonestring(record.noiDungMau).value);
+            coThaoTac = "1";
+            return false;
+        }Bên aspx.cs
+public string getonestring(string value)
+        {
+            return HttpUtility.HtmlDecode(value);
+         
+        }
+HÀM XÓA THÔNG BÁO DIALOG KHI MÃ ÐU?C S? D?NG
+ 
+function Grid1_OnBeforeClientDelete(record) {
+            ma = record.sttDMBaoCaoMaupr;
+            var kq = NTSoftReceipt.danhmuc.dmbaocaomau.kiemTraXoa(ma).value;
+              if ( kq!="") {
+                  document.getElementById("duocsd").innerHTML = kq;
+                  Dialog2.Open();
+               // alert("Báo cáo: " + record.tenBaoCao+ " dang s? d?ng nên b?n không th? th?c hi?n xóa!");
+            }
+            else {
+                Dialog1.Open();
+            }
+            return false;
+        }
+
+  <owd:Dialog ID="Dialog2" runat="server" IsModal="true" ShowCloseButton="true" Top="0" Left="250"
+            Height="150" Width="350" VisibleOnLoad="false" StyleFolder="~/App_Themes/Styles/wdstyles/dogma"
+            Title="C?nh báo">
+            <div align="center" style="height: 30px; margin-top:15px">
+              B?n không th? th?c hi?n xóa báo cáo này vì du?c s? d?ng b?i các ch?c nang:
+            </div>
+          <hr />
+          <div id="duocsd" align="center" style="height: 50px; margin-top:0px"></div>
+        </owd:Dialog>
+TÌM KI?M TRÊN GRID 
+ 
+Gán cu?i grid, add thu vi?n nhúng vào Default
+<TemplateSettings HeadingTemplateId="idHeadingGrid1" />
+                <Templates>
+                    <cc1:GridTemplate runat="server" ID="idHeadingGrid1">
+                    <Template>
+                        <input type="text" placeholder="N?i dung tìm ki?m..." style="width:250px;height:23px;" onkeyup="searchValue(Grid1,1,this.value)" class="searchCss" />
+                        </Template>
+                </cc1:GridTemplate>
+                </Templates>
+Trong hàm load
+  if (!IsPostBack)
+            {
+                Grid1.DataSource = null;
+                Grid1.DataBind();
+            }
+Trong lu?i thêm
+<FilteringSettings  FilterPosition="Top" FilterLinksPosition="Bottom"  MatchingType="AnyFilter"/>
+B?t thu?c tính
+FilterType="ProgrammaticOnly"
+        AllowFiltering="true"
+VÔ HI?U HÓA TEXTBOX TRÊN LU?I
+	ReadOnly="true" : Vi?t trong c?t mu?n vô hi?u hóa
+ 
+
+NH?NG CÂU SELECT L?NG CÓ S? D?NG SUM, CASE WHEN…. END, COUT
+Case when
+ 
+sum
+select sttNKpr,soPhieu,convert(nvarchar(10),ngayLap,103) as ngayLap,maDonVipr_sd,(select tenDonVi from tblDMDonVi where  maDonVipr= maDonVipr_sd) as tenDonVi,(select tenNhanVien from tblDMNhanVien where  maNhanVienpr= maNhanVienpr_nguoilap) as nguoiLap,maNhanVienpr_nguoilap,diaDiem,dienGiai,(select tenKho from tblDMKho where  maKhopr= maKhopr_sd) as tenKho,maKhopr_sd,isnull((SELECT SUM(thanhTien) FROM dbo.tblNhapKhoCT WHERE sttNKpr_sd= sttNKpr),0) AS thanhTien, dauNam from tblNhapKho
+COUT
+
+Load d? li?u lên textbox 
+Vi?t trong Ispostback
+string sql = "select top 1 convert(nvarchar(10),ngayNhapLieu,103) as ngayNhapLieu from tblBaoCaoPhongKinhDoanh order by ngayNhapLieu asc";
+                SqlFunction _vSqlFunction = new SqlFunction();
+                DataTable _dt = new DataTable();
+                _dt = _vSqlFunction.GetData(sql);
+                if (_dt.Rows.Count > 0)
+                {
+                   _tuNgay.Text= _dt.Rows[0][0].ToString();
+                }
+
+*********************************X? LÝ THÊM S?A CÓ NGÀY THÁNG NAM
+-------------------c#
+                if (param[8] != null)
+                {
+                    if (param[8].ToString() != "")
+                    {
+                        string ngaylap = param[8].ToString().Substring(3, 2) + "/" + param[8].ToString().Substring(0, 2) + "/" + param[8].ToString().Substring(6, 4);
+                        cmd.Parameters.Add(new SqlParameter(@"ngayLap", ngaylap));
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add(new SqlParameter(@"ngayLap", DBNull.Value));
+                    }
+                }
+                else
+                    cmd.Parameters.Add(new SqlParameter(@"ngayLap", DBNull.Value));
+*********************************GÁN NGÀY CHO TEXTBOX KHI LOAD D? LI?U
+txtngayLap.Text = DateTime.Now.ToString("dd/MM/yyyy");
